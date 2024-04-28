@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>employee management</title>
+</head>
+<style>
+    .main_conatainer {
+        width: 90%;
+        margin: auto;
+        border: 1px solid black;
+    }
+
+    .main_conatainer>h1 {
+        text-align: center;
+    }
+
+    .main_conatainer>nav {
+        display: flex;
+        width: 100%;
+        height: 4rem;
+        /* border: 1px solid black; */
+        justify-content: space-around;
+        align-items: center;
+        box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+    }
+
+    #pagination {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    table {
+        width: 100%;
+        border: 1px solid black;
+
+    }
+
+    table>thead>tr>th {
+        border-bottom: 1px solid rgb(195, 192, 192);
+        border-collapse: collapse;
+    }
+
+    table>tbody>tr>td {
+        border-bottom: 1px solid black;
+        /* border-collapse: collapse; */
+    }
+</style>
+
+<body>
+    <div class="main_conatainer">
+        <h1>Employee Management System</h1>
+        <nav>
+            <div>
+                <label for="depertment">Filter by Depertment:</label>
+                <select name="depertment" id="depertment" onchange="onSort()">
+                    <option value="defult">Defult Option</option>
+                    <option value="hr">HR</option>
+                    <option value="finance">finance</option>
+                    <option value="marketing">marketing </option>
+                    <option value="engineering">engineering </option>
+                    <option value="operations">operations </option>
+                </select>
+            </div>
+            <div>
+                <label for="gender">Filter by Gender:</label>
+                <select name="gender" id="gender" onchange="onSort()">
+                    <option value="select">Select</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+
+            </div>
+            <div>
+                <label for="sort_salary">Sort by Salary</label>
+                <select name="sort_salary" id="sort_salary" onchange="onSort()">
+                    <option value="asc">Low to High</option>
+                    <option value="dsc">High to Low</option>
+                </select>
+            </div>
+        </nav>
+        <div id="hero_section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>S.no</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Depertment</th>
+                        <th>Salary</th>
+                    </tr>
+
+                </thead>
+                <tbody id="tbody">
+
+
+                </tbody>
+            </table>
+        </div>
+        <div id="pagination">
+            <button onclick="pagination(-1)" id="previous">Previous</button>
+            <button onclick="pagination(1)" id="next">Next</button>
+        </div>
+
+    </div>
+
+</body>
+<script>
+    let page = 1
+    let pageLimit = 10
+    // catching all element when user  select option differnt
+    let selectDepertment = document.getElementById('depertment')
+    let selectGender = document.getElementById('gender')
+    let sort_salary = document.getElementById('sort_salary')
+
+    // catching next and previous button 
+    let next = document.getElementById('next')
+    let previous = document.getElementById('previous')
+
+    // catching element tbody
+
+    let tbody = document.getElementById('tbody')
+
+    // getting all the employee data
+    let getData = async () => {
+        let data = await fetch(`https://dbioz2ek0e.execute-api.ap-south-1.amazonaws.com/mockapi/get-employees?page=${page}&limit=${pageLimit}`)
+        data = await data.json()
+        if (sort_salary.value == 'asc') {
+            data = data.data?.sort((a, b) => a.salary - b.salary)
+            console.log(data)
+        }
+        if (sort_salary.value == 'dsc') {
+            data = data.data?.sort((a, b) => b.salary - a.salary)
+        }
+        if (selectGender.value == 'male') {
+            data = data.filter(ele => ele.gender == selectGender.value)
+        }
+        if (selectGender.value == 'female') {
+            data = data.filter(ele => ele.gender == selectGender.value)
+        }
+        if (selectDepertment.value == 'hr') {
+            data = data?.filter(ele => ele.department == selectDepertment.value)
+        }
+        if (selectDepertment.value == 'finance') {
+            data = data?.filter(ele => ele.department == selectDepertment.value)
+
+        }
+        if (selectDepertment.value == 'marketing') {
+            data = data?.filter(ele => ele.department == selectDepertment.value)
+
+        }
+        if (selectDepertment.value == 'engineering') {
+            data = data?.filter(ele => ele.department == selectDepertment.value)
+
+        }
+        if (selectDepertment.value == 'operations') {
+            data = data?.filter(ele => ele.department == selectDepertment.value)
+
+        }
+        showEmployee(data)
+        // console.log(data.data, 'got it successfully')
+    }
+
+    // pagination  functin
+    let pagination = (page_number) => {
+        page += page_number
+        if (page <= 1) {
+            page = 1
+            previous.disabled = true
+
+        } else {
+            previous.disabled = false
+
+        }
+        if (page == pageLimit) {
+            next.disabled = true
+        } else {
+            next.disabled = false
+        }
+        getData(page)
+    }
+
+    // rendering ui throug map inside function
+    let showEmployee = (data) => {
+        tbody.innerHTML = "";
+        data?.map(ele => {
+            let tr = document.createElement('tr')
+            let th1 = document.createElement('th')
+            let th2 = document.createElement('th')
+            let th3 = document.createElement('th')
+            let th4 = document.createElement('th')
+            let th5 = document.createElement('th')
+            th1.innerText = ele.id
+            th2.innerText = ele.name
+            th3.innerText = ele.gender
+            th4.innerText = ele.department
+            th5.innerText = ele.salary
+            tr.append(th1, th2, th3, th4, th5)
+            tbody.append(tr)
+
+        })
+    }
+    let onSort = () => {
+        getData()
+    }
+
+    // get data function calling 
+    getData()
+</script>
+
+</html>
